@@ -313,9 +313,51 @@ class Maze:
         for i in range(self._num_cols):
             for j in range(self._num_rows):
                 self._cells[i][j]._visited = False
-                print("resetting", self._cells[i][j]._visited)
 
+    def solve(self):
+        return self._solve_r(0,0)
 
+    def _solve_r(self, i, j):
+        self._animate()
+        self._cells[i][j]._visited = True
+        if self._cells[i][j] is self._cells[-1][-1]:
+            return True
+        #directions = [(i-1, j), (i+1, j)]
+        if i < self._num_cols-1 and self._cells[i+1][j]:
+            if self._cells[i+1][j]._visited is False and self._cells[i+1][j].has_left_wall is False:
+                self._cells[i][j].draw_move(self._cells[i+1][j])
+                ret = self._solve_r(i+1, j)
+                if ret is False:
+                    self._cells[i][j].draw_move(self._cells[i+1][j], undo=True)
+                else:
+                    return True
+        if i > 0 and self._cells[i-1][j]:
+            if self._cells[i-1][j]._visited is False and self._cells[i-1][j].has_right_wall is False:
+                self._cells[i][j].draw_move(self._cells[i-1][j])
+                ret = self._solve_r(i-1, j)
+                if ret is False:
+                    self._cells[i][j].draw_move(self._cells[i-1][j], undo=True)
+                else:
+                    return True
+        print("test", j)
+        if j < self._num_rows-1 and self._cells[i][j+1]:
+            if self._cells[i][j+1]._visited is False and self._cells[i][j+1].has_top_wall is False:
+                self._cells[i][j].draw_move(self._cells[i][j+1])
+                ret = self._solve_r(i, j+1)
+                if ret is False:
+                    self._cells[i][j].draw_move(self._cells[i][j+1], undo=True)
+                else:
+                    return True
+        if j > 0 and self._cells[i][j-1]:
+            if self._cells[i][j-1]._visited is False and self._cells[i][j-1].has_bottom_wall is False:
+                self._cells[i][j].draw_move(self._cells[i][j-1])
+                ret = self._solve_r(i, j-1)
+                if ret is False:
+                    self._cells[i][j].draw_move(self._cells[i][j-1], undo=True)
+                else:
+                    return True
+
+        return False
 
 
 def main():
@@ -330,6 +372,7 @@ def main():
     maze = Maze(100, 100, 5, 5, 150, 50, win, seed=0) 
     maze._break_walls_r(0,0)
     maze._reset_cells_visited()
+    maze.solve()
 
     win.wait_for_close()
 
